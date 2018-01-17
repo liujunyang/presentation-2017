@@ -1,0 +1,797 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>2017述职报告-刘俊洋</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>2017述职报告</h1>
+					<h3>不忘初心，一边踩坑，一遍前行</h3>
+					<p>
+						<small>Created by 刘俊洋 2018.01.16</small>
+					</p>
+				</section>
+
+				<section>
+					<img data-src="./images/ppt-挑担.jpg">
+				</section>
+
+				<section>
+					<section>
+						<h1>半年来的主要工作</h1>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							## List
+
+							* 遥控器重构
+							* 小程序
+							* 小程序国际化
+							* 习题续时、指纹等
+						</textarea>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>遥控器重构</h1>
+					</section>
+
+					<section style="clear: both;">
+						<img data-src="./images/ppt-home.jpg" style="float: left; width: 17%; margin-right: 20px;">
+						<img data-src="./images/ppt-thumb.png" style="float: left; width: 17%; margin-right: 20px;">
+						<img data-src="./images/ppt-activity.jpg" style="float: left; width: 17%; margin-right: 20px;">
+						<img data-src="./images/ppt-problem.jpg" style="float: left; width: 17%; margin-right: 20px;">
+						<img data-src="./images/ppt-hongbao.jpg" style="float: left; width: 17%; margin-right: 20px;">
+					</section>
+
+					<section data-markdown style="text-align: left;">
+						<textarea data-template>
+							### 动机
+							教师遥控器之前使用的是 [component](https://cn.vuejs.org/v2/guide/components.html#%E5%8A%A8%E6%80%81%E7%BB%84%E4%BB%B6) 切换蒙版的方式，
+							```js
+							<div class="rc-mask" v-show="!isInitiativeCtrlMaskHidden">
+							  <component
+							    ref="InitiativeCtrlMask"
+							    // 通过切换 is 参数来改变动态组件显示的内容
+							    :is="initiativeCtrlMaskTpl"
+							    @goHome="goHome"
+									// ...
+							  ></component>
+							</div>
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: left;">
+						<textarea data-template>
+							出现一些问题：
+
+							* 着业务量的增大，维护起来日渐吃力
+							* 数据关系趋于复杂，多人维护困难
+							* 另外交互时无法使用返回键
+						</textarea>
+					</section>
+
+					<section>
+						重构后的遥控器改变为使用路由的方式，符合用户最自然的使用习惯，并且和小程序的代码尽可能一致。
+						另外使用了 `vuex` 并进行了持久化，对于遥控器这种大型单页应用来说，状态管理更加流畅、清晰。
+						新代码结构、注释更加清晰、语义化更加到位，维护、开发新 feature 所需维护、学习成本大大降低。
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							[`vuex`](https://vuex.vuejs.org/zh-cn/intro.html)
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 入口
+							```js
+							import router from '@/router/index-teacher'
+							import store from '@/pages/teacher/store';
+							...
+							new Vue({
+							   el: '#app',
+							   router,
+							   store,
+							   template: '<App/>',
+							 })
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### `store`
+							```js
+							import Vue from 'vue'
+							import Vuex from 'vuex'
+							// import home from './modules/home'
+							import getters from './getters'
+							import createPersistedState from 'vuex-persistedstate'
+
+							Vue.use(Vuex)
+
+							const store = new Vuex.Store({
+							  plugins: [createPersistedState()],
+							  state: {
+							    userid: -1,                             // 用户id
+							    avatar: '',                             // 用户头像
+							    auth: '',                               // 用户身份
+									...
+							  },
+
+							  mutations: {
+							  	set_userid (state, id) {
+							      state.userid = id
+							    },
+							    set_avatar (state, avatar) {
+							      state.avatar = avatar
+							    },
+							    set_auth (state, auth) {
+							      state.auth = auth
+							    },
+							    ...
+							    
+							  },
+							  getters
+							})
+
+							export default store
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### `getter`
+							```js
+							const getters = {
+							  userid: state => state.userid,
+							  avatar: state => state.avatar,
+							  auth: state => state.auth,
+							  ...
+							};
+							export default getters
+
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 使用`getter`
+							```js
+							...
+							import {mapGetters} from 'vuex'
+							...
+							export default {
+							  name: 'Remote',
+							  // 找不到的data在 mixins 中
+							  data () {
+							    return {
+							      ...
+							    }
+							  },
+							  computed: {
+							    ...mapGetters([
+							    	'userid',
+							    	'avatar', 
+							    	'auth',   
+							    	...
+						      ])
+							  },
+							  ...
+							 }
+							```
+						</textarea>
+					</section>
+					
+				</section>
+
+				<section>
+					<section>
+						<h1>小程序</h1>
+					</section>
+
+					<section>
+						<img data-src="./images/ppt-任务.jpg">
+					</section>
+
+					<section>
+						<img data-src="./images/ppt-小程序.jpg">
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 目前功能
+
+							* index 页
+							* 教师遥控器
+							* 学生接收器
+							* web-view 跳转H5页面
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### layout
+
+							```
+							| - lib           	       js库
+							| - mock            	     假数据
+							| - pages                  小程序pages
+							  | - index                index页面
+							  | - remotecontrol        遥控器页面
+							    | - teacher            教师遥控器页面
+							      | - home             教师遥控器-主页面
+							      | - activity         教师遥控器-课堂动态页面
+							      | - ...
+							    | - student            学生接收器页面
+							      | - presentation     接收器主页面
+							      | - quiz             做课上试卷页
+							      | - quiz-score       点击提交试卷后进入的得分答题卡页
+							      | - quiz-result-info 交卷后或收卷后的查看试卷页
+							      | - ...
+							  | - ... 其他待增加页面，如我的课程
+							| - style                  样式库
+							| - util                   自定义功能函数
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 文档
+
+							[confluence](http://confluence.xuetangx.com/pages/viewpage.action?pageId=13547855)
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 会话管理
+
+							[weapp-session-client](https://github.com/CFETeam/weapp-session-client)
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							#### request 包装
+
+							```js
+							const co = require('./co.js');
+							...
+							/**
+							 * 生成 header 信息
+							 */
+							const buildHeader = co.wrap(function *() {
+							    if (currentCode) {
+							        ...
+							        return { [headers.WX_CODE]: currentCode };
+							    } else {
+							        return pendingHeader = pendingHeader || co(function *() {
+							            const { code } = yield login();
+							            const { rawData, signature, encryptedData, iv } = yield getUserInfo();
+							            ...
+							            return {
+							                [headers.WX_CODE]: currentCode,
+							                [headers.WX_RAW_DATA]: encodeURIComponent(rawData),
+							                [headers.WX_SIGNATURE]: signature || '',
+							                [headers.WX_ENCRYPTED_DATA]: encryptedData,
+							                [headers.WX_IV]: iv,
+							            };
+							        });
+							    }
+							});
+
+							/**
+							 * 带会话管理的网络请求，参数配置和 wx.request 一致
+							 */
+							function requestWithSession(options = {}) {
+							    let tryTimes = 0;
+							    const wrapRequest = co.wrap(function *() {
+							        ...
+							        return wx.request(Object.assign({}, options, {
+							            header: Object.assign({}, options.headers, yield buildHeader()),
+
+							            success({ data }) {
+							                ...
+							                callSuccess(...arguments);
+							            },
+							            ...
+							        }));
+							    });
+
+							    return wrapRequest();
+							}
+
+							module.exports = requestWithSession;
+
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							#### 使用 `request` step-1
+							```js
+							// app.js
+							...
+							const request = require('./util/weapp-session-client/session-request')
+							...
+
+							App({
+							  onLaunch: function () {
+							    ...
+							  },
+							  onShow: function () {
+							    ...
+							  },
+							  onHide: function () {
+							    ...
+							  },
+							  
+							  request,
+							  ...
+							})
+
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							#### 使用 `request` step-2
+
+							```js
+							// somepage.js
+							app.request({
+							  url,
+							  method: 'GET',
+							  success(jsonData) {
+							    jsonData = jsonData.data
+							    self.setData({
+							      participantList: jsonData.data.students,
+							      // 下面又翻转过来只是为了hack float  left样式
+							      avatarList: jsonData.data.students.slice(-10)
+							    })
+							  },
+							  fail(error) {
+							    console.error('error', error);
+							  }
+							})
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 目前使用到的微信基础库功能 约 30 个
+
+							```js
+							web-view
+							子组件
+							wx.pageScrollTo
+							wx.stopPullDownRefresh
+							wx.showToast
+							wx.showModal
+
+							wx.createSelectorQuery.select.boundingClientRect
+							wx.setNavigationBarTitle
+
+							wx.navigateTo
+							wx.navigateBack
+							wx.redirectTo
+
+							wx.showLoading
+							wx.hideLoading
+							wx.showNavigationBarLoading
+							wx.hideNavigationBarLoading
+
+							wx.previewImage
+							wx.chooseImage
+
+							wx.getStorage
+							wx.setStorage
+							wx.getStorageSync
+							wx.removeStorage
+							wx.getSystemInfoSync
+
+							wx.downloadFile
+							wx.uploadFile
+
+							wx.connectSocket
+							wx.onSocketOpen
+							wx.onSocketMessage
+							wx.sendSocketMessage
+							wx.onSocketError
+							wx.onSocketClose
+							wx.closeSocket
+
+							wx.requestPayment
+							```
+						</textarea>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>小程序国际化</h1>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							[i18n](https://zh.wikipedia.org/wiki/%E5%9B%BD%E9%99%85%E5%8C%96%E4%B8%8E%E6%9C%AC%E5%9C%B0%E5%8C%96)
+						</textarea>
+					</section>
+
+					<section style="clear: both;">
+						<img data-src="./images/ppt-en-home.jpg" style="float: left; width: 22%; margin-right: 20px;">
+						<img data-src="./images/ppt-en-thumb.jpg" style="float: left; width: 22%; margin-right: 20px;">
+						<img data-src="./images/ppt-en-activity.jpg" style="float: left; width: 22%; margin-right: 20px;">
+						<img data-src="./images/ppt-en-hongbao.jpg" style="float: left; width: 22%; margin-right: 20px;">
+					</section>
+
+					<section>
+						把小程序进行国际化是从无到有的。
+						我整理出了一套完备的小程序国际化方案，并整理了文档，以后公司其他项目的小程序也进行国际化时完全可以推广。
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 现状
+							小程序国际化[官方没有支持](https://developers.weixin.qq.com/blogdetail?action=get_post_info&lang=zh_CN&token=&docid=8c8af2056cdca1263aafcebc26bd180f)，也没有现成的插件。
+
+							网上有人做了国际化的[尝试](http://www.jianshu.com/p/5d0da1e43948)。但是只能替换静态文本，就是简单的键值匹配。
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 方案简介
+
+							如果想让翻译的内容渲染在页面中，需要把翻译的数据放在 Page 的 data 中，对于动态渲染带可变参数的数据， 在 setData 的时候加个尾巴（在其后面set 带参数的翻译的 data）。
+							目前基本方案是自己开发一套翻译工具：
+							* 功能：
+							        1. 翻译静态文案
+							        2. 翻译带参数的文案
+							*缺陷
+							        1.由于只能返回字符串，没有类似vue 通过 `v-html` 进行标签替换的能力，所以对带标签（样式）的翻译无能为力。
+							
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 方案总结
+
+							优先保证中文用户的使用体验，对于不带标签的类型的翻译，中英文没有区别，对于带标签的类型的翻译，将中文翻译直接放在 `wxml` 中，只是在中文的情况下显示，在非中文时直接隐藏。
+							
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 造工具
+
+							```js
+							// i18n.js
+							module.exports = {
+							  locale: 'en',
+							  locales: {},
+							  registerLocale (locales) {
+							    this.locales = locales
+							  },
+							  setLocale (code) {
+							    this.locale = code
+							  },
+							  /**
+							   * 返回带（或不带）参数的类型的翻译结果
+							   * @param {string} key, /util/language/en.js 中的键名，如 "curslide"
+							   * @param {object} data, 传入的参数，如 {num: 123}
+							   * @returns {string}
+							   *
+							   * @desc 如："activeno": "当前学生{activeno}位",
+							   *       activeno 为 key，可以输入data {activeno: 15}
+							   *       返回："当前学生15位"
+							   */
+							  _ (key, data) {
+							    let locale = this.locale
+							    let locales = this.locales
+							    let hasKey = locale && locales[locale] && locales[locale][key]
+
+							    if (hasKey) {
+							      key = locales[locale][key]
+
+							      let res = key.replace(/\{[\s\w]+\}/g, x => {
+							        x = x.substring(1, x.length-1).trim()
+							        return data[x];
+							      })
+
+							      return res
+							    }
+
+							    throw new Error(`语言处理错误${key}`)
+							  },
+							  /**
+							   * 返回二选一类型的翻译结果
+							   * @param {string} key, /util/language/en.js 中的键名，如 "curslide"
+							   * @param {object} data, 传入的参数，如 {first: true} 选择前面的
+							   * @returns {string}
+							   *
+							   * @desc 如："sendprob": "Send | Check",
+							   *       sendprob 为 key，可以输入data {first: true}
+							   *       返回："Send"
+							   */
+							  _b (key, data) {
+							    let locale = this.locale
+							    let locales = this.locales
+							    let hasKey = locale && locales[locale] && locales[locale][key]
+
+							    if (hasKey) {
+							      key = locales[locale][key]
+
+							      let res = key.split('|')[data.first ? 0 : 1].trim()
+
+							      return res
+							    }
+
+							    throw new Error(`语言处理错误${key}`)
+							  }
+							}
+							```
+							
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 用工具 step-1
+
+							```js
+							// somepage.js
+							let app = getApp()
+							const util = require('../../../../util/util')
+							const langData = require('./langData')
+							...
+
+							Page({
+
+							  /**
+							   * 页面的初始数据
+							   */
+							  data: Object.assign({}, langData.data, {
+							    problemid: -1,
+							    ...
+							  }),
+
+							  /**
+							   * 生命周期函数--监听页面加载
+							   */
+							  onLoad: function (options) {
+							    let self = this
+							    ...
+							    util.resetSetData.call(self, langData)
+							  },
+
+							})
+
+							```
+							
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 用工具 step-2
+
+							```js
+							// util.js
+							/**
+							 * 代理小程序的 setData，在更新数据后，翻译传参类型的字符串
+							 *
+							 * @param {object} langData 当页的翻译模块
+							 */
+							function resetSetData (langData) {
+							  let self = this
+
+							  let _ = self.setData
+
+							  self.setData = function(data, isSetTrans = false){
+							    _.call(self, data)
+							    if (isSetTrans) {/* 阻止翻译循环调用 setData  */return;}
+							    langData.setTransData && langData.setTransData.call(self)
+							  }
+							  
+							}
+
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 用工具 step-3
+
+							```js
+							// langData.js
+							const i18n = getApp().i18n
+
+							let data = {
+							  'bonustips': i18n._('bonustips'),
+							  ...
+							}
+
+							module.exports  = {
+							  data: {
+							  	T_D: data
+							  },
+							  setTransData () {
+							    let self = this
+							    self.setData({
+							      'T_D.quantity2': i18n._('quantity2', {num: self.data.stuNumer}),
+							    }, true)
+							  }
+							}
+
+							```
+							
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							```js
+							// zh_CN.js
+							module.exports = {
+							  "ykt": "雨课堂",
+							  "undone": "未完成",
+							  "done": "已完成",
+
+							  "pno": "第{number}页",
+							  "totalprob": "共{number}题",
+								...
+							};
+
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							```html
+							<view class="row f18">
+								<!-- 红包个数 -->{{T_D.quantity}}
+								<text class="fz14">（<!-- 班级共 {{stuNumer}} 人 -->{{T_D.quantity2}}）</text>
+							</view>
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 坑
+
+							在小程序中，使用子组件的页面， `this.setData` `configurable` 和 `writable` 都是 `false`
+						</textarea>
+					</section>
+
+					<section>
+						<img data-src="./images/ppt-无奈.jpeg">
+					</section>
+
+					<section data-markdown style="text-align: center;">
+						<textarea data-template>
+							### 解决方法
+
+							```js
+							// util.js
+							/**
+							 * 代理小程序的 setData，在更新数据后，翻译传参类型的字符串
+							 *
+							 * @param {object} langData 当页的翻译模块
+							 */
+							function resetSetData (langData) {
+							  let self = this
+
+							  /**
+							   * 在小程序中，使用子组件的页面， this.setData configurable 和 writable 都是 false
+							   * 所以不能重置 setData 方法，只能另起一个函数名，这里用了 setComData，
+							   * 另外，由于在 langData.js 中 setTransData 方法调用的是 setData，
+							   * 所以，另外给使用子组件的页面，定义了个 setComTransData 方法，去调用 setComData
+							   */
+
+							  let isUsingComponents = !self.__proto__.hasOwnProperty('setData') && self.__proto__.__proto__.hasOwnProperty('setData')
+							  let _ = self.setData
+
+							  if (!isUsingComponents) {
+							    self.setData = function(data, isSetTrans = false){
+							      _.call(self, data)
+							      if (isSetTrans) {/* 阻止翻译循环调用 setData  */return;}
+							      langData.setTransData && langData.setTransData.call(self)
+							    }
+							  } else {
+							    self.setComData = function(data, isSetTrans = false){
+							      _.call(self, data)
+							      if (isSetTrans) {/* 阻止翻译循环调用 setData  */return;}
+							      langData.setComTransData && langData.setComTransData.call(self)
+							    }
+							  }
+							  
+							}
+
+							```
+						</textarea>
+					</section>
+
+					<section></section>
+				</section>
+
+				<section>
+					<section>
+						<h1>习题续时、指纹等</h1>
+					</section>
+
+				</section>
+
+				<section>
+					<section>
+						<h1>其他</h1>
+					</section>
+
+					<section>
+						主观题评语、多选题判分、匿名投票等
+					</section>
+
+				</section>
+
+				<section>
+					<h1>THE END</h1>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
